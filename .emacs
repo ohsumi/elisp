@@ -356,8 +356,8 @@ With argument ARG, do this that many times."
 ;; new 
 (global-set-key (kbd "=") (smartchr '("=" "==")))
 (smartrep-define-key global-map "C-o"
-  '(("C-e" . elscreen-next)
-    ("C-a" . elscreen-previous)))
+  '(("k" . elscreen-next)
+    ("j" . elscreen-previous)))
   
 (require 'visual-regexp)
 (require 'foreign-regexp)
@@ -568,6 +568,7 @@ With argument ARG, do this that many times."
 (defun javascript-custom-setup ()
   (moz-minor-mode 1))
 (add-hook 'javascript-mode-hook 'javascript-custom-setup)
+
 
 ;; PostgreSQL
 (require 'sql)
@@ -929,17 +930,41 @@ With argument ARG, do this that many times."
 (require 'web-mode)
 (require 'php-mode)
 (require 'zencoding-mode)
+(add-to-list 'load-path "~/.emacs.d/clone/impatient-mode")
+;; (require 'simple-httpd)
+;; (require 'htmlize)
+;; (require 'impatient-mode)
+;; (setq httpd-root "/Users/taka/.emacs.d/elpa/skewer-mode-20150914.1304")
+;; (setq httpd-root "/Users/taka/")
+;; (httpd-start)
+;; helm-M-x => httpd-start => impatient-mode => fail.
 
-(defun web-mode-hook ()
-  "Hooks for Web mode."
-  (setq zencoding-indentation 0)
-  (define-key html-mode-map (kbd "C-c C-v") nil)
-  (define-key html-mode-map (kbd "C-c C-v") 'multi-term)
-  (define-key html-mode-map (kbd "C-c C-o") nil)
-  (define-key html-mode-map (kbd "C-c C-o") 'browse-url-of-buffer)
-  (define-key html-mode-map (kbd "C-c C-p") nil)
-  (define-key html-mode-map (kbd "C-c C-p") 'find-file-at-point)
-  (define-key html-mode-map (kbd "C-c C-l") nil)
+;;(define-key js2-mode-map (kbd "C-c :") 'eval-expression)
+;;(global-set-key (kbd "C-c C-") 'run-skewer)
+;;(global-set-key (kbd "C-c C-r") 'skewer-repl)
+;;(global-set-key (kbd "C-c C-r") 'skewer-eval-last-expression)
+(require 'skewer-mode)
+(defservlet skewer/demo text/html ()
+  (insert-file-contents (expand-file-name "index.html" "~/public_html/")))
+
+(add-hook 'js2-mode-hook 'skewer-mode)
+(add-hook 'css-mode-hook 'skewer-css-mode)
+(add-hook 'html-mode-hook 'skewer-html-mode)
+
+(global-unset-key (kbd "C-u"))
+;; (global-set-key (kbd "C-u C-u") 'my-moz-
+
+
+;; (defun web-mode-hook ()
+;;   "Hooks for Web mode."
+;;   (setq zencoding-indentation 0)
+;;   (define-key html-mode-map (kbd "C-c C-v") nil)
+;;   (define-key html-mode-map (kbd "C-c C-v") 'multi-term)
+;;   (define-key html-mode-map (kbd "C-c C-o") nil)
+;;   (define-key html-mode-map (kbd "C-c C-o") 'browse-url-of-buffer)
+;;   (define-key html-mode-map (kbd "C-c C-p") nil)
+;;   (define-key html-mode-map (kbd "C-c C-p") 'find-file-at-point)
+;;   (define-key html-mode-map (kbd "C-c C-l") nil)
   (define-key html-mode-map (kbd "C-c C-l") 'recenter)
   (define-key js2-mode-map (kbd "C-c C-a") nil)
   (define-key js2-mode-map (kbd "C-c C-f") nil)
@@ -1041,3 +1066,29 @@ With argument ARG, do this that many times."
 	  (t (message "Hello default. Do nothing.")))))
 
 (global-set-key (kbd "C-l t") 'select-function-switching-by-major-mode)
+
+;; (call-process "ls" nil t nil)
+;; (defun delete-files (extension)
+;; (interactive)
+;; (call-process ...)
+;; ==> "find dir_name -name "*.org" | xargs rm"
+;; or....
+;; ==> "make"
+
+;; (setq case-fold-search nil)
+;; (defun search-camel-case-backward ()
+;;   (interactive)
+;;   (backward-char)
+;;   (re-search-backward (rx (in "A-Z"))))
+;; (defun search-camel-case-forward ()
+;;   (interactive)
+;;   (forward-char)
+;;   (re-search-forward (rx (in "A-Z"))))
+;; (global-set-key (kbd "C-l t") 'search-camel-case-forward)
+;; (global-set-key (kbd "C-l y") 'search-camel-case-backward)
+;; http://d.hatena.ne.jp/tomoya/20101213/1292166026					
+;; (what-cursor-position)
+
+;; insert-space for JS editing.
+;; 1,2,3 => 1, 2, 3
+
