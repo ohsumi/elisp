@@ -3,7 +3,7 @@
 	     "~/.emacs.d/clone/emacs-color-themes")
 
 (global-unset-key (kbd "C-o"))
-(global-unset-key (kbd "C-q"))
+;; (global-unset-key (kbd "C-q"))
 (global-unset-key (kbd "C-o k"))
 (global-unset-key (kbd "C-o a"))
 (global-unset-key (kbd "C-o f"))
@@ -218,7 +218,8 @@ With argument ARG, do this that many times."
 (global-set-key (kbd "C-l C-h") 'helm-mini)
 (global-set-key (kbd "C-l C-w") 'helm-resume)
 (global-set-key (kbd "C-l l") 'eval-last-sexp)
-(global-set-key (kbd "C-q") 'helm-M-x)
+;; (global-set-key (kbd "C-q") 'helm-M-x)
+(global-set-key (kbd "C-r") 'helm-M-x)
 
 ;; prefix "C-x"
 (global-set-key (kbd "C-x C-u") 'eval-buffer)
@@ -951,20 +952,68 @@ With argument ARG, do this that many times."
 (add-hook 'css-mode-hook 'skewer-css-mode)
 (add-hook 'html-mode-hook 'skewer-html-mode)
 
-(global-unset-key (kbd "C-u"))
-;; (global-set-key (kbd "C-u C-u") 'my-moz-
+(defvar moz-scroll-ratio "60") ;; スクロール量の比率。100(%)で1ページ毎のスクロール。
+(defvar moz-scroll-time "60") ;; アニメーション時間。高いほどゆっくりに。
 
+(defun moz-send-line (str)
+  (interactive)
+  (comint-send-string (inferior-moz-process)
+                      (concat moz-repl-name ".pushenv('printPrompt', 'inputMode'); "
+                              moz-repl-name ".setenv('inputMode', 'line'); "
+                              moz-repl-name ".setenv('printPrompt', false); undefined; "))
+  (comint-send-string (inferior-moz-process) (concat str "; "))
+  (comint-send-string (inferior-moz-process)
+                      (concat moz-repl-name ".popenv('inputMode', 'printPrompt'); undefined;\n")))
 
-;; (defun web-mode-hook ()
-;;   "Hooks for Web mode."
-;;   (setq zencoding-indentation 0)
-;;   (define-key html-mode-map (kbd "C-c C-v") nil)
-;;   (define-key html-mode-map (kbd "C-c C-v") 'multi-term)
-;;   (define-key html-mode-map (kbd "C-c C-o") nil)
-;;   (define-key html-mode-map (kbd "C-c C-o") 'browse-url-of-buffer)
-;;   (define-key html-mode-map (kbd "C-c C-p") nil)
-;;   (define-key html-mode-map (kbd "C-c C-p") 'find-file-at-point)
-;;   (define-key html-mode-map (kbd "C-c C-l") nil)
+(defun moz-prev-tab ()
+  (interactive)
+  (moz-send-line "gBrowser.mTabContainer.advanceSelectedTab(-1, true)"))
+
+(defun moz-next-tab ()
+  (interactive)
+  (moz-send-line "gBrowser.mTabContainer.advanceSelectedTab(1, true)"))
+
+(defun moz-google-search (word)
+  (interactive "sSearch Word: ")
+  (moz-open-uri-in-new-tab "http://www.google.co.jp/search?hl=ja&q=" word))
+
+(defun moz-undo-close-tab ()
+  (interactive)
+  (comint-send-string (inferior-moz-process) "undoCloseTab();"))
+
+(defun moz-tab-close ()
+  "Close current tab"
+  (interactive)
+  (moz-send-message "content.window.close();"))
+
+(global-unset-key (kbd "C-q"))
+(smartrep-define-key global-map "C-q"
+  '(("C-a" . moz-prev-tab)
+    ("C-f" . moz-next-tab)
+    ("C-k" . moz-tab-close)
+    ("C-h" . moz-goole-search)
+    ("C-n" . my-moz-scrolldown-1)
+    ("C-p" . my-moz-scrollup-1)
+    ("C-r" . my-moz-browser-reload)
+    ("C-t" . my-moz-scrollup)
+    ("C-v" . my-moz-scrolldown)
+    ("C-z" . moz-undo-close-tab)))
+
+;;(global-set-key (kbd "c-x ret <up>") 'moz-scroll-up) ;; C-x C-m C-p
+;;(global-set-key (kbd "c-x ret <down>") 'moz-scroll-down) ;; C-x C-m C-n
+;;(global-set-key (kbd "c-x ret del") 'moz-prev-tab) ;; C-x C-m C-h
+;;(global-set-key (kbd "c-x ret c-l") 'moz-next-tab) ;; C-x C-m C-l
+
+(defun web-mode-hook ()
+  "Hooks for Web mode."
+  (setq zencoding-indentation 0)
+  (define-key html-mode-map (kbd "C-c C-v") nil)
+  (define-key html-mode-map (kbd "C-c C-v") 'multi-term)
+  (define-key html-mode-map (kbd "C-c C-o") nil)
+  (define-key html-mode-map (kbd "C-c C-o") 'browse-url-of-buffer)
+  (define-key html-mode-map (kbd "C-c C-p") nil)
+  (define-key html-mode-map (kbd "C-c C-p") 'find-file-at-point)
+  (define-key html-mode-map (kbd "C-c C-l") nil)
   (define-key html-mode-map (kbd "C-c C-l") 'recenter)
   (define-key js2-mode-map (kbd "C-c C-a") nil)
   (define-key js2-mode-map (kbd "C-c C-f") nil)
